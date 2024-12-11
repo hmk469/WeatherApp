@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather App</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  </head>
+  <body>
+    <div class="card">
+      <div class="search">
+        <input
+          type="text"
+          id="city-input"
+          placeholder="Enter city name"
+          spellcheck="false"
+        />
+        <button id="search-btn">
+          <img
+            src="https://cdn-icons-png.flaticon.com/128/54/54481.png"
+            alt="Search"
+          />
+        </button>
+      </div>
+      <div class="weather">
+        <img
+          src="https://cdn-icons-png.flaticon.com/128/8841/8841374.png"
+          class="weather-icon"
+          alt="Weather Icon"
+        />
+        <h1 class="temp">--°C</h1>
+        <h2 class="city">City</h2>
+        <div class="details">
+          <div class="col">
+            <img
+              src="https://cdn-icons-png.flaticon.com/128/6142/6142706.png"
+              alt="Humidity Icon"
+            />
+            <div>
+              <p class="humidity">--%</p>
+              <p>Humidity</p>
+            </div>
+          </div>
+          <div class="col">
+            <img
+              src="https://cdn-icons-png.flaticon.com/128/9367/9367346.png"
+              alt="Wind Icon"
+            />
+            <div>
+              <p class="wind">-- km/h</p>
+              <p>Wind Speed</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const apiKey = "c10a9e208680b19ecb07781fc00a7bb5";
+
+      async function checkWeather(city) {
+        const apiUrl = `https://api.openweathermap.org/data/2.5/weather?units=metric&q=${city}&appid=${apiKey}`;
+
+        try {
+          console.log(`Fetching weather for: ${city}`); // Log the city being fetched
+          
+          // Fetch weather data from the API
+          const response = await fetch(apiUrl);
+
+          // Log response status
+          console.log(`Response status: ${response.status}`);
+          
+          if (!response.ok) {
+            // Log raw response for debugging
+            const rawResponse = await response.text();
+            console.error(`Raw response: ${rawResponse}`);
+            throw new Error(`City not found or API error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          
+          // Log the fetched data
+          console.log(`Weather data for ${city}:`, data);
+
+          // Update the UI with fetched data
+          document.querySelector(".city").textContent = data.name;
+          document.querySelector(".temp").textContent = `${Math.round(data.main.temp)}°C`;
+          document.querySelector(".humidity").textContent = `${data.main.humidity}%`;
+          document.querySelector(".wind").textContent = `${data.wind.speed} km/h`;
+
+          // Update weather icon based on condition
+          const weatherIcon = document.querySelector(".weather-icon");
+          const iconCode = data.weather[0].icon;
+          weatherIcon.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+          
+        } catch (error) {
+          console.error("Error fetching weather data:", error);
+          alert("Unable to fetch weather data. Please check the city name and try again!");
+        }
+      }
+
+      // Event listener for search button
+      document.getElementById("search-btn").addEventListener("click", () => {
+        const city = document.getElementById("city-input").value;
+        if (city.trim()) {
+          checkWeather(city);
+        } else {
+          alert("Please enter a valid city name!");
+        }
+      });
+
+      // Fetch default weather for a city on page load (e.g., Bangalore)
+      checkWeather("Bangalore");
+    </script>
+  </body>
+</html>
